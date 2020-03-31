@@ -1,0 +1,79 @@
+void dijikstraAlgo(int src)
+{
+    vector<bool> vis(n, false);
+    priority_queue<dPair> que;
+    que.push(dPair(src, -1, 0, 0, to_string(src)));
+
+    while (que.size() != 0)
+    {
+        dPair pair = que.top();
+        que.pop();
+
+        if (!vis[pair.src])
+        {
+            if (pair.par != -1)
+            {
+                Newgraph[pair.src].push_back(new Edge(pair.par, pair.w));
+                Newgraph[pair.par].push_back(new Edge(pair.src, pair.w));
+            }
+        }
+        else
+            continue;
+
+        vis[pair.src] = true;
+        for (Edge *e : graph[pair.src])
+        {
+            if (!vis[e->v])
+                que.push(dPair(e->v, pair.src, e->w, pair.wsf + e->w, pair.psf + to_string(e->v)));
+        }
+    }
+
+    //display.
+    for (int i = 0; i < n; i++)
+    {
+        cout << i << " -> ";
+        for (Edge *e : Newgraph[i])
+        {
+            cout << "(" << e->v << ", " << e->w << ") ";
+        }
+        cout << endl;
+    }
+
+    cout << endl;
+}
+
+vector<int> dis(n, 0);
+vector<int> low(n, 0);
+vector<int> par(n, -1);
+vector<int> AP(n, 0);
+vector<bool> vis(n, false);
+
+int countTime = 0;
+int rootCount = 0;
+
+void dfs(int u)
+{
+    dis[u] = low[u] = countTime++;
+    vis[u] = true;
+    for (Edge *e : graph[u])
+    {
+        int nbr = e->v;
+        if (!vis[nbr]) //unvisited
+        {
+            if (par[u] == -1)
+                rootCount++;
+            par[nbr] = u;
+            dfs(nbr);
+
+            if (dis[u] <= low[nbr])
+                AP[u]++;
+            if (dis[u] < low[nbr])
+                cout << "AP Edge: " << u << " -> " << nbr << endl;
+            low[u] = min(low[u], low[nbr]);
+        }
+        else if (par[u] != nbr) //visited
+        {
+            low[u] = min(low[u], dis[nbr]);
+        }
+    }
+}
